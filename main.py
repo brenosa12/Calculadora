@@ -3,13 +3,14 @@ import sys
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 from info import Info
-from dispay import Display
+from dispay import Display, setupTheme
 from main_window import MainWindow
 from variables import WINDOW_ICON_PATH
 
 if __name__ == '__main__':
     # Creating the apllication
     app = QApplication(sys.argv)
+    setupTheme()
     window = MainWindow()
 
     # Defining the icon
