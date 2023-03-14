@@ -2,8 +2,9 @@ import sys
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
-from info import Info
-from dispay import Display, setupTheme
+
+from buttons import ButtonGrid
+from display import Display, Info, setupTheme
 from main_window import MainWindow
 from variables import WINDOW_ICON_PATH
 
@@ -16,14 +17,21 @@ if __name__ == '__main__':
     # Defining the icon
     icon = QIcon(str(WINDOW_ICON_PATH))
     window.setWindowIcon(icon)
-    window.adjustFixedSize()
 
     # Info
-    info = Info('10 * 10')
-    window.addToVLayout(info)
+    info = Info('')
+    window.addWidgetToVLayout(info)
+
     # Display
     display = Display()
-    window.addToVLayout(display)
+    window.addWidgetToVLayout(display)
+
+    # Grid of Buttons
+    buttonsGrid = ButtonGrid()
+    window.vLayout.addLayout(buttonsGrid)
+
+    # Ajust
+    window.adjustFixedSize()
 
     # Execute
     window.show()
