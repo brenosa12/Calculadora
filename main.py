@@ -27,7 +27,7 @@ if __name__ == '__main__':
     window.addWidgetToVLayout(display)
 
     # Grid of Buttons
-    buttonsGrid = ButtonGrid()
+    buttonsGrid = ButtonGrid(display, info)
     window.vLayout.addLayout(buttonsGrid)
 
     # Ajust
