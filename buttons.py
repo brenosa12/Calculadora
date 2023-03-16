@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QPushButton, QGridLayout
 from variables import MEDIUM_FONT_SIZE
 from utils import IsNumOrDot, isEmpty, IsValidNumber
 from PySide6.QtCore import Slot
-
+from math import pow
 if TYPE_CHECKING:
     from display import Display, Info
 
@@ -34,7 +34,13 @@ class ButtonGrid(QGridLayout):
         self.display = display
         self.info = info
         self._equation = ''
+        self._equationInitialValue = 'Sua Conta'
+        self._left = None
+        self._right = None
+        self._op = None
         self._makeGrid()
+
+        self._equation = self._equationInitialValue
 
     @property
     def equation(self):
@@ -66,7 +72,18 @@ class ButtonGrid(QGridLayout):
         if text == 'C':
             self._buttonClicked(button, self._clear)
 
+        if text in '◀':
+            self._buttonClicked(button, self.display.backspace)
+
+        if text in '+-/*^':
+            self._buttonClicked(button, self._makeSlot(
+                self._operatorClicked, button))
+
+        if text in '=':
+            self._buttonClicked(button, self._eq)
+
     # Make the real slot
+
     def _makeSlot(self, func, *args, **kwargs):
         @Slot()
         def realSlot(_):
@@ -74,6 +91,7 @@ class ButtonGrid(QGridLayout):
         return realSlot
 
     # Insert the Text of Button in Display
+
     def _insertTextToDisplay(self, button):
         buttonText = button.text()
         newDisplayValue = self.display.text() + buttonText
@@ -84,4 +102,55 @@ class ButtonGrid(QGridLayout):
         self.display.insert(buttonText)
 
     def _clear(self):
+        self._left = None
+        self._right = None
+        self._op = None
+        self._equation = self._equationInitialValue
         self.display.clear()
+
+    # Definition the equation
+
+    def _operatorClicked(self, button):
+        buttonText = button.text()
+        displayText = self.display.text()
+        self.display.clear()
+
+        if not IsValidNumber(displayText) and self._left is None:
+            return
+
+        if self._left is None:
+            self._left = float(displayText)
+
+        self._op = buttonText
+        self.equation = f'{self._left} {self._op} ??'
+
+    # Definition the result
+
+    def _eq(self):
+        displayText = self.display.text()
+
+        if not IsValidNumber(displayText):
+            return
+
+        self._right = float(displayText)
+        self .equation = f'{self._left} {self._op} {self._right}'
+        result = 'error'
+        try:
+            if '^' in self.equation and isinstance(self._left, float):
+                result = pow(self._left, self._right)
+            else:
+                result = eval(self.equation)
+
+        except ZeroDivisionError:
+            result = 'Operação Inválida'
+
+        except OverflowError:
+            result = 'Operação Inválida'
+
+        self.display.clear()
+        self.info.setText(f'{self.equation} = {result}')
+        self._left = result
+        self._right = None
+
+        if result == 'ERROR':
+            self._left = None
