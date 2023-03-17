@@ -2,13 +2,20 @@ from PySide6.QtWidgets import QLineEdit, QLabel
 from variables import BIG_FONT_SIZE, TEXT_MARGIN, MINIMUM_WIDHT
 from variables import DARKER_PRIMARY_COLOR, DARKEST_PRIMARY_COLOR
 from variables import PRIMARY_COLOR, SMALL_FONT_SIZE
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QKeyEvent
 import qdarktheme
+from utils import isEmpty
 
 
 class Display(QLineEdit):
+    eqTried = Signal()
+    delPressed = Signal()
+    clearPressed = Signal()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.configStyle()
 
     def configStyle(self):
@@ -17,6 +24,32 @@ class Display(QLineEdit):
         self.setMinimumWidth(MINIMUM_WIDHT)
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.setTextMargins(*[TEXT_MARGIN for text in range(4)])
+
+    # Config the  key receptor
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        text = event.text().strip()
+        key = event.key()
+        KEYS = Qt.Key
+
+        isEnter = key in [KEYS.Key_Enter, KEYS.Key_Return, KEYS.Key_Equal]
+        isDel = key in [KEYS.Key_Delete, KEYS.Key_Backspace]
+        isEsc = KEYS.Key_Escape
+
+        if isEnter:
+            self.eqTried.emit()
+            return event.ignore()
+
+        if isDel:
+            self.delPressed.emit()
+            return event.ignore()
+
+        if isEsc or text:
+            self.clearPressed.emit()
+            return event.ignore()
+
+        if isEmpty(text):
+            return event.ignore()
 
 
 # Setup theme
@@ -46,8 +79,8 @@ def setupTheme():
                        }}, additional_qss=qss
     )
 
-# Info from the top
 
+# Info from the top
 
 class Info(QLabel):
     def __init__(self, *args, **kwargs):
