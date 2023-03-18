@@ -4,12 +4,12 @@ NUM_OR_DOT_REGEX = re.compile(r'^[0-9.]$')
 
 
 # function to checked if number is a number or Dot
-def IsNumOrDot(string: str):
+def isNumOrDot(string: str):
     return bool(NUM_OR_DOT_REGEX.search(string))
 
 
 # function to checked if slot is a number valid
-def IsValidNumber(string: str):
+def isValidNumber(string: str):
     valid = False
     try:
         float(string)

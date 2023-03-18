@@ -5,13 +5,15 @@ from variables import PRIMARY_COLOR, SMALL_FONT_SIZE
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeyEvent
 import qdarktheme
-from utils import isEmpty
+from utils import isEmpty, isNumOrDot
 
 
 class Display(QLineEdit):
     eqTried = Signal()
     delPressed = Signal()
     clearPressed = Signal()
+    inputPressed = Signal(str)
+    operatorPressed = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,21 +36,35 @@ class Display(QLineEdit):
 
         isEnter = key in [KEYS.Key_Enter, KEYS.Key_Return, KEYS.Key_Equal]
         isDel = key in [KEYS.Key_Delete, KEYS.Key_Backspace]
-        isEsc = KEYS.Key_Escape
+        isEsc = key in [KEYS.Key_Escape]
+        isOperator = key in [KEYS.Key_Plus, KEYS.Key_Minus, KEYS.Key_Slash,
+                             KEYS.Key_Asterisk, KEYS.Key_P]
 
         if isEnter:
             self.eqTried.emit()
             return event.ignore()
 
         if isDel:
+
             self.delPressed.emit()
             return event.ignore()
 
-        if isEsc or text:
+        if isEsc:
             self.clearPressed.emit()
             return event.ignore()
 
         if isEmpty(text):
+            return event.ignore()
+
+        if isNumOrDot(text):
+
+            self.inputPressed.emit(text)
+            return event.ignore()
+
+        if isOperator:
+            if text.lower() == 'p':
+                text = '^'
+            self.operatorPressed.emit(text)
             return event.ignore()
 
 
