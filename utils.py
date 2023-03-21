@@ -22,3 +22,13 @@ def isValidNumber(string: str):
 # function to checked if slot is empty
 def isEmpty(string: str):
     return string == ''
+
+
+def convertToNumber(string: str):
+
+    newNumber = float(string)
+
+    if newNumber.is_integer():
+        newNumber = int(newNumber)
+
+    return newNumber

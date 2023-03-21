@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QPushButton, QGridLayout
 from variables import MEDIUM_FONT_SIZE
-from utils import isNumOrDot, isEmpty, isValidNumber
+from utils import isNumOrDot, isEmpty, isValidNumber, convertToNumber
 from PySide6.QtCore import Slot
 from math import pow
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class ButtonGrid(QGridLayout):
             ['7', '8', '9', '*'],
             ['4', '5', '6', '-'],
             ['1', '2', '3', '+'],
-            ['',  '0', '.', '='],
+            ['N',  '0', '.', '='],
         ]
         self.display = display
         self.info = info
@@ -42,9 +42,8 @@ class ButtonGrid(QGridLayout):
         self._left = None
         self._right = None
         self._op = None
+        self.equation = self._equationInitialValue
         self._makeGrid()
-
-        self._equation = self._equationInitialValue
 
     @property
     def equation(self):
@@ -71,7 +70,7 @@ class ButtonGrid(QGridLayout):
                     self._configSpecialButton(button)
                 self.addWidget(button, i, j)
                 slot = self._makeSlot(self._insertTextToDisplay,
-                                      button)
+                                      buttonText)
                 self._buttonClicked(button, slot)
 
     def _buttonClicked(self, button, slot):
@@ -83,12 +82,15 @@ class ButtonGrid(QGridLayout):
         if text == 'C':
             self._buttonClicked(button, self._clear)
 
+        if text == 'N':
+            self._buttonClicked(button, self._clear)
+
         if text == '◀':
-            self._buttonClicked(button, self.display.backspace)
+            self._buttonClicked(button, self._invert)
 
         if text in '+-/*^':
             self._buttonClicked(button, self._makeSlot(
-                self._configLeftOp, button))
+                self._configLeftOp, text))
 
         if text == '=':
             self._buttonClicked(button, self._eq)
@@ -112,6 +114,16 @@ class ButtonGrid(QGridLayout):
 
         self.display.insert(text)
 
+    # number inverter signal
+    @Slot()
+    def _invert(self):
+        displayText = self.display.text()
+        if not isValidNumber(displayText):
+            return
+        newNumber = convertToNumber(displayText) * -1
+
+        self.display.setText(str(newNumber))
+
     def _clear(self):
         self._left = None
         self._right = None
@@ -131,7 +143,7 @@ class ButtonGrid(QGridLayout):
             return
 
         if self._left is None:
-            self._left = float(displayText)
+            self._left = convertToNumber(displayText)
 
         self._op = text
         self.equation = f'{self._left} {self._op} ??'
@@ -146,7 +158,7 @@ class ButtonGrid(QGridLayout):
 
             return
 
-        self._right = float(displayText)
+        self._right = convertToNumber(displayText)
         self.equation = f'{self._left} {self._op} {self._right}'
         result = 'error'
         try:
