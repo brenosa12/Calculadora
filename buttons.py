@@ -57,10 +57,11 @@ class ButtonGrid(QGridLayout):
     def _makeGrid(self):
 
         self.display.eqTried.connect(self._eq)
-        self.display.delPressed.connect(self.display.backspace)
+        self.display.delPressed.connect(self._backspace)
         self.display.clearPressed.connect(self._clear)
         self.display.inputPressed.connect(self._insertTextToDisplay)
         self.display.operatorPressed.connect(self._configLeftOp)
+        self.display.invertPressed.connect(self._invert)
 
         for i, row in enumerate(self._gridMask):
             for j, buttonText in enumerate(row):
@@ -83,10 +84,10 @@ class ButtonGrid(QGridLayout):
             self._buttonClicked(button, self._clear)
 
         if text == 'N':
-            self._buttonClicked(button, self._clear)
+            self._buttonClicked(button, self._invert)
 
         if text == '◀':
-            self._buttonClicked(button, self._invert)
+            self._buttonClicked(button, self._backspace)
 
         if text in '+-/*^':
             self._buttonClicked(button, self._makeSlot(
@@ -113,6 +114,7 @@ class ButtonGrid(QGridLayout):
             return
 
         self.display.insert(text)
+        self.display.setFocus()
 
     # number inverter signal
     @Slot()
@@ -123,6 +125,7 @@ class ButtonGrid(QGridLayout):
         newNumber = convertToNumber(displayText) * -1
 
         self.display.setText(str(newNumber))
+        self.display.setFocus()
 
     def _clear(self):
         self._left = None
@@ -130,13 +133,16 @@ class ButtonGrid(QGridLayout):
         self._op = None
         self.equation = self._equationInitialValue
         self.display.clear()
+        self.display.setFocus()
 
     # Definition the equation
+
     @Slot()
     def _configLeftOp(self, text):
 
         displayText = self.display.text()
         self.display.clear()
+        self.display.setFocus()
 
         if not isValidNumber(displayText) and self._left is None:
             self._showError('Você nao digitou nada.')
@@ -149,11 +155,12 @@ class ButtonGrid(QGridLayout):
         self.equation = f'{self._left} {self._op} ??'
 
     # Definition the result
+
     @Slot()
     def _eq(self):
         displayText = self.display.text()
 
-        if not isValidNumber(displayText):
+        if not isValidNumber(displayText) or self._left is None:
             self._showError('Operação Incompleta.')
 
             return
@@ -162,12 +169,9 @@ class ButtonGrid(QGridLayout):
         self.equation = f'{self._left} {self._op} {self._right}'
         result = 'error'
         try:
-            if not self._op:
-                self._showError('Operação Incompleta.')
-                self.equation = f'{self._right}'
-
-            if '^' in self.equation and isinstance(self._left, float):
+            if '^' in self.equation and isinstance(self._left, float | int):
                 result = pow(self._left, self._right)
+                result = convertToNumber(str(result))
             else:
                 result = eval(self.equation)
 
@@ -183,9 +187,15 @@ class ButtonGrid(QGridLayout):
         self.info.setText(f'{self.equation} = {result}')
         self._left = result
         self._right = None
+        self.display.setFocus()
 
         if result == 'ERROR':
             self._left = None
+
+    @Slot()
+    def _backspace(self):
+        self.display.backspace()
+        self.display.setFocus()
 
     # Show error to user
 
@@ -194,3 +204,4 @@ class ButtonGrid(QGridLayout):
         msgBox.setText(text)
         msgBox.setIcon(msgBox.Icon.Critical)
         msgBox.exec()
+        self.display.setFocus()

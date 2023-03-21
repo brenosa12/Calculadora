@@ -14,6 +14,7 @@ class Display(QLineEdit):
     clearPressed = Signal()
     inputPressed = Signal(str)
     operatorPressed = Signal(str)
+    invertPressed = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,6 +40,7 @@ class Display(QLineEdit):
         isEsc = key in [KEYS.Key_Escape]
         isOperator = key in [KEYS.Key_Plus, KEYS.Key_Minus, KEYS.Key_Slash,
                              KEYS.Key_Asterisk, KEYS.Key_P]
+        isInvert = key in [KEYS.Key_N]
 
         if isEnter:
             self.eqTried.emit()
@@ -65,6 +67,10 @@ class Display(QLineEdit):
             if text.lower() == 'p':
                 text = '^'
             self.operatorPressed.emit(text)
+            return event.ignore()
+
+        if isInvert:
+            self.invertPressed.emit()
             return event.ignore()
 
 
