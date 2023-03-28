@@ -1,6 +1,6 @@
 # Calculadora 
 ***
-Este é um projeto de uma calculadora simples, feita em Python e utilizando os módulos PySide6, QDarkTheme, pathlib e sys. A calculadora possui uma interface gráfica amigável, que permite ao usuário realizar operações aritméticas básicas.
+Este é um projeto de uma calculadora simples, feita em Python e utilizando os módulos PySide6, QDarkTheme, pathlib e sys. A calculadora possui uma interface gráfica agradável, que permite ao usuário realizar operações aritméticas básicas, sendo ela capaz de captar tanto os números digitados quanto selecionados na própria interface.
 
 ## Requisitos
 ***
