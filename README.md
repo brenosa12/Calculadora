@@ -13,10 +13,10 @@ Antes de executar o projeto, é necessário instalar os seguintes módulos:
 
 Você pode instalar esses módulos utilizando o pip, o gerenciador de pacotes do Python. Basta abrir o terminal e digitar:
 
-pip install PySide6
-pip install qdarktheme
-pip install pathlib
-pip install sys
+* pip install PySide6
+* pip install qdarktheme
+* pip install pathlib
+* pip install sys
 
 ## Limitações
 ***
